@@ -1,0 +1,17 @@
+---
+version: "3.7"
+services:
+  dbhandler:
+    image: lab.wdg.cloud/section9/db-handler:latest
+    build: .
+    env_file:
+      - ./.env
+    volumes:
+      - "${LOCAL_DB_PASSWORD_FILE}:${DB_PASSWORD_FILE}:"
+      - "${LOCAL_DB_ROOT_PASSWORD_FILE}:${DB_ROOT_PASSWORD_FILE}:ro"
+      - "${SHARED_VOLUME_DIR}:/app"
+
+networks:
+  default:
+    external: true
+    name: ${DBNET_NETWORK_NAME}

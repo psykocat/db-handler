@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# subscript help
+_sub_usage(){
+	cat >> /dev/stderr <<-EOF
+	usage: ${_script_exec_helpname}
+
+	Help for the subscript
+	EOF
+}
+
+# Input the command to execute in a _main() function
+_main(){
+	local _args=()
+
+	while [ ${#} -gt 0 ]; do
+		case ${1} in
+			--)
+				shift;
+				for _remain in ${@}; do
+					_args+=("${_remain}")
+				done
+				unset -- _remain
+				break
+				;;
+			-help|--help)
+				_sub_usage
+				exit
+				;;
+			*)
+				_args+=("${1}")
+				;;
+		esac
+		shift
+	done
+	log_inf "Do something here"
+}
+
+_main "${@}"
+
+#END
