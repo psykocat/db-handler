@@ -2,7 +2,7 @@
 version: "3.7"
 services:
   dbhandler:
-    image: lab.wdg.cloud/section9/db-handler:latest
+    image: psykocat/db-handler:latest
     build: .
     env_file:
       - ./.env
