@@ -30,9 +30,9 @@ usage() {
 
 ## Rights management
 preset_rights(){
-	_orig_uid=$(stat -c '%u' /app)
-	_orig_gid=$(stat -c '%g' /app)
-	sudo chown -R dbhandler:dbhandler /app
+	_orig_uid=$(stat -c '%u' ${__shared_dir})
+	_orig_gid=$(stat -c '%g' ${__shared_dir})
+	sudo chown -R dbhandler:dbhandler ${__shared_dir}
 }
 
 cleanup(){
@@ -41,7 +41,7 @@ cleanup(){
 		rm -vrf -- "${_ftr}"
 	done
 
-	sudo chown -R "${_orig_uid}:${_orig_gid}" /app
+	sudo chown -R "${_orig_uid}:${_orig_gid}" ${__shared_dir}
 }
 trap cleanup EXIT ABRT HUP
 
