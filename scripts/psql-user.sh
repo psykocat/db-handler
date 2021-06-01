@@ -43,11 +43,11 @@ _delete_db(){
 }
 
 _add_db_extension(){
-	local _ext="${1}"
+	local _ext="${1}" _dbname="${2}"
 
 	log_inf "Enable '${_ext}' extension if not already existing"
 	# Use default database postgres as reference for logging
-	echo "CREATE EXTENSION IF NOT EXISTS ${_ext}\gexec" | psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" postgres
+	echo "CREATE EXTENSION IF NOT EXISTS ${_ext}\gexec" | psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" "${_dbname}"
 }
 
 _create_user(){
@@ -62,6 +62,7 @@ _create_user(){
 	cat > "${_pgs}" <<-EOF
 	CREATE USER ${_dbuser} WITH ENCRYPTED PASSWORD '${_dbpass}';
 	GRANT ALL PRIVILEGES ON DATABASE ${_dbname} TO ${_dbuser};
+	ALTER DATABASE ${_dbname} OWNER TO ${_dbuser};
 	EOF
 	psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" postgres -f "${_pgs}"
 }
@@ -99,6 +100,9 @@ _process_field_user(){
 	if [ "${__user_action}" = "add" ]; then
 		_create_db "${_dbname}"
 		_create_user "${_dbuser}" "${_dbpass}" "${_dbname}"
+		for _ext in ${__database_extensions[@]}; do
+			_add_db_extension "${_ext}" "${_dbname}"
+		done
 	elif [ "${__user_action}" = "delete" ]; then
 		_delete_user "${_dbuser}"
 	fi
@@ -148,11 +152,6 @@ _main(){
 		_process_field_user ${_tmpl}
 	done
 
-	if [ "${__user_action}" = "add" ]; then
-		for _ext in ${__database_extensions[@]}; do
-			_add_db_extension "${_ext}"
-		done
-	fi
 }
 
 _main "${@}"
