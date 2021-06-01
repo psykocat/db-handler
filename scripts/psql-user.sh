@@ -144,15 +144,15 @@ _main(){
 	if [ ${#_args[@]} -eq 0 ]; then
 		_args+=( "${DB_USER}:${DB_PASSWORD}:${DB_NAME}" )
 	fi
+	for _tmpl in ${_args[@]}; do
+		_process_field_user ${_tmpl}
+	done
 
 	if [ "${__user_action}" = "add" ]; then
 		for _ext in ${__database_extensions[@]}; do
 			_add_db_extension "${_ext}"
 		done
 	fi
-	for _tmpl in ${_args[@]}; do
-		_process_field_user ${_tmpl}
-	done
 }
 
 _main "${@}"
