@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -eu
-set -x
+#set -x
 
 _files_to_remove=()
 _orig_uid=
