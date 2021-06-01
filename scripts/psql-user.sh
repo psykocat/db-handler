@@ -6,6 +6,13 @@ file_env DB_ROOT_USER
 file_env DB_ROOT_PASSWORD
 file_env DB_NAME
 
+__int_db_user=${DB_USER}
+__int_db_root_user=${DB_ROOT_USER}
+if [ -n "${USER_CONNECTION_EXT:-}" ]; then
+	__int_db_user=${__int_db_user%${USER_CONNECTION_EXT}}
+	__int_db_root_user=${__int_db_root_user%${USER_CONNECTION_EXT}}
+fi
+
 __user_action="add"
 __remove_db=""
 
@@ -60,9 +67,10 @@ _create_user(){
 	_files_to_remove+=("${_pgs}")
 
 	cat > "${_pgs}" <<-EOF
-	CREATE USER ${_dbuser} WITH ENCRYPTED PASSWORD '${_dbpass}';
-	GRANT ALL PRIVILEGES ON DATABASE ${_dbname} TO ${_dbuser};
-	ALTER DATABASE ${_dbname} OWNER TO ${_dbuser};
+	CREATE USER ${__int_db_user} WITH ENCRYPTED PASSWORD '${_dbpass}';
+	GRANT ALL PRIVILEGES ON DATABASE ${_dbname} TO ${__int_db_user};
+	GRANT ${__int_db_user} TO ${__int_db_root_user};
+	ALTER DATABASE ${_dbname} OWNER TO ${__int_db_user};
 	EOF
 	psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" postgres -f "${_pgs}"
 }
@@ -73,9 +81,9 @@ _delete_user(){
 	local _pgs="/tmp/usermanagement.sql"
 	_files_to_remove+=("${_pgs}")
 
-	log_inf "Remove user '${_dbuser}'"
+	log_inf "Remove user '${__int_db_user}'"
 	cat > "${_pgs}" <<-EOF
-	DROP USER ${_dbuser};
+	DROP USER ${__int_db_user};
 	EOF
 	psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" postgres -f "${_pgs}"
 }
