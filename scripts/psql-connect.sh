@@ -1,9 +1,12 @@
 #!/bin/bash
 
 # Configure using simple user password
-file_env DB_PASSWORD
-file_env DB_ROOT_PASSWORD
 file_env DB_USER
+file_env DB_PASSWORD
+if [ -n "${DB_ROOT_USER:-}" ]; then
+	file_env DB_ROOT_USER
+	file_env DB_ROOT_PASSWORD
+fi
 file_env DB_NAME
 
 # subscript help

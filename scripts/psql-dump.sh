@@ -2,8 +2,10 @@
 
 file_env DB_USER
 file_env DB_PASSWORD
-file_env DB_ROOT_USER
-file_env DB_ROOT_PASSWORD
+if [ -n "${DB_ROOT_USER:-}" ]; then
+	file_env DB_ROOT_USER
+	file_env DB_ROOT_PASSWORD
+fi
 file_env DB_NAME
 
 # subscript help
@@ -54,6 +56,10 @@ _main(){
 				__dump_method="_dump_all_databases"
 				;;
 			--root)
+				if [ -z "${DB_ROOT_USER:-}" ]; then
+					log_err "No root user infos provided. Please fill DB_ROOT_USER and DB_ROOT_PASSWORD variables."
+					exit 1
+				fi
 				__conn_user="DB_ROOT_USER"
 				;;
 			*)

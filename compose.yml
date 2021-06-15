@@ -9,7 +9,7 @@ services:
     volumes:
       - "${LOCAL_DB_PASSWORD_FILE}:${DB_PASSWORD_FILE}:"
       - "${LOCAL_DB_ROOT_PASSWORD_FILE}:${DB_ROOT_PASSWORD_FILE}:ro"
-      - "${SHARED_VOLUME_DIR}:/app"
+      - "${SHARED_VOLUME_DIR}:/backup"
 
 networks:
   default:
