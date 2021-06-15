@@ -22,14 +22,14 @@ _dump_database(){
 	local dumpfile="${__shared_dir}/${_TS}_backup_${DB_NAME}.sql" _conn=
 	_conn="${!__conn_user}"
 	pg_dump ${*} -C -U "${_conn}" -h "${DB_HOST}" "${DB_NAME}" > "${dumpfile}"
-	gzip -v "${dumpfile}"
+	gzip -9 -v "${dumpfile}"
 }
 
 _dump_all_databases(){
 	local dumpfile="${__shared_dir}/${_TS}_backup_all.sql" _conn=
 	_conn="${!__conn_user}"
 	pg_dumpall ${*} -C -U "${_conn}" -h "${DB_HOST}" > "${dumpfile}"
-	gzip -v "${dumpfile}"
+	gzip -9 -v "${dumpfile}"
 }
 
 # Input the command to execute in a _main() function
