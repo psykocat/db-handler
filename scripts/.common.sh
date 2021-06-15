@@ -3,7 +3,7 @@
 ## To use the common script copy in your script the uncommented line below
 #. "${DBHANDLER_SCRIPTS_DIR}/.common.sh"
 
-__shared_dir="/app"
+__shared_dir="${DBHANDLER_BACKUP_DIR}"
 
 # Generic and fixed timestamp for backups among others
 _TS=$(date +%y%m%d-%H%M)
