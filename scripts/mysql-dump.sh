@@ -5,7 +5,7 @@ file_env DB_USER
 file_env DB_NAME
 
 _main(){
-	local dump_file="${__shared_dir}/${_TS}_backup_${DB_NAME}.sql"
+	local dump_basepath="${_TS}_backup_${DB_NAME}.sql" dumpfile="${__shared_dir}/${dump_basepath}"
 	mysqldump \
 		--add-drop-table \
 		--compress \
@@ -18,7 +18,11 @@ _main(){
 
 	log_inf "Compressing database dump ..."
 	gzip -v -9 ${dump_file}
-	ln -frs "${dumpfile}.gz" "${__shared_dir}/latest_backup_${DB_NAME}.sql.gz"
+
+	(
+	cd ${__shared_dir}
+	ln -fs "${dump_basepath}.gz" "latest_backup_${DB_NAME}.sql.gz"
+	)
 }
 
 _main
