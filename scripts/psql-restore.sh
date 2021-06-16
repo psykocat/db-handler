@@ -8,6 +8,8 @@ if [ -n "${DB_ROOT_USER:-}" ]; then
 fi
 file_env DB_NAME
 
+backup_file=
+
 # subscript help
 _sub_usage(){
 	cat >> /dev/stderr <<-EOF
@@ -17,23 +19,23 @@ _sub_usage(){
 	EOF
 }
 
-__dump_method="_dump_database"
+__restore_method="_restore_database"
 __conn_user="DB_USER"
 
-_dump_database(){
-	local dumpfile="${__shared_dir}/${_TS}_backup_${DB_NAME}.sql" _conn=
+_restore_database(){
+	local _backup_file="${backup_file%.gz}" _conn=
 	_conn="${!__conn_user}"
-	log_inf "Dumping ${DB_NAME} as ${_conn}"
-	pg_dump ${*} -C -U "${_conn}" -h "${DB_HOST}" "${DB_NAME}" > "${dumpfile}"
-	gzip -9 -v "${dumpfile}"
+	log_inf "Restoring ${DB_NAME} as ${_conn}"
+	gunzip "${backup_file}.gz"
+	psql ${*} -C -U "${_conn}" -h "${DB_HOST}" "${DB_NAME}" < "${_backup_file}"
 }
 
-_dump_all_databases(){
-	local dumpfile="${__shared_dir}/${_TS}_backup_all_databases.sql" _conn=
+_restore_all_databases(){
+	local _backup_file="${backup_file%.gz}" _conn=
 	_conn="${!__conn_user}"
-	log_inf "Dumping all databases as ${_conn}"
-	pg_dumpall ${*} -C -U "${_conn}" -h "${DB_HOST}" > "${dumpfile}"
-	gzip -9 -v "${dumpfile}"
+	log_inf "Restoring all databases as ${_conn}"
+	gunzip "${backup_file}"
+	psql ${*} -C -U "${_conn}" -h "${DB_HOST}" postgres -f "${_backup_file}"
 }
 
 # Input the command to execute in a _main() function
@@ -55,7 +57,7 @@ _main(){
 				exit
 				;;
 			--all)
-				__dump_method="_dump_all_databases"
+				__restore_method="_restore_all_databases"
 				;;
 			--root)
 				if [ -z "${DB_ROOT_USER:-}" ]; then
@@ -65,14 +67,22 @@ _main(){
 				__conn_user="DB_ROOT_USER"
 				;;
 			*)
-				_args+=("${1}")
+				if [ -s "${__shared_dir}/${1}" ]; then
+					backup_file="${__shared_dir}/${1}"
+				else
+					_args+=("${1}")
+				fi
 				;;
 		esac
 		shift
 	done
 	_setup_pgpass
 
-	${__dump_method} ${_args[@]}
+	if [ -n "${backup_latest_}" ]; then
+		log_err "No backup properly provided, please check your arguments"
+		exit 1
+	fi
+	${__restore_method} ${_args[@]}
 }
 
 _main "${@}"
