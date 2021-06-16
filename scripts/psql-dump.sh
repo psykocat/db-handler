@@ -26,6 +26,7 @@ _dump_database(){
 	log_inf "Dumping ${DB_NAME} as ${_conn}"
 	pg_dump ${*} -c --if-exists -U "${_conn}" -h "${DB_HOST}" "${DB_NAME}" > "${dumpfile}"
 	gzip -9 -v "${dumpfile}"
+	ln -frs "${dumpfile}.gz" "${__shared_dir}/latest_backup_${DB_NAME}.sql.gz"
 }
 
 _dump_all_databases(){
@@ -34,6 +35,7 @@ _dump_all_databases(){
 	log_inf "Dumping all databases as ${_conn}"
 	pg_dumpall ${*} -c --if-exists -U "${_conn}" -h "${DB_HOST}" > "${dumpfile}"
 	gzip -9 -v "${dumpfile}"
+	ln -frs "${dumpfile}.gz" "${__shared_dir}/latest_backup_all_databases.sql.gz"
 }
 
 # Input the command to execute in a _main() function
