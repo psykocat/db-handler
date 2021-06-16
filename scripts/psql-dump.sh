@@ -24,7 +24,7 @@ _dump_database(){
 	local dumpfile="${__shared_dir}/${_TS}_backup_${DB_NAME}.sql" _conn=
 	_conn="${!__conn_user}"
 	log_inf "Dumping ${DB_NAME} as ${_conn}"
-	pg_dump ${*} -C -U "${_conn}" -h "${DB_HOST}" "${DB_NAME}" > "${dumpfile}"
+	pg_dump ${*} -c --if-exists -U "${_conn}" -h "${DB_HOST}" "${DB_NAME}" > "${dumpfile}"
 	gzip -9 -v "${dumpfile}"
 }
 
@@ -32,7 +32,7 @@ _dump_all_databases(){
 	local dumpfile="${__shared_dir}/${_TS}_backup_all_databases.sql" _conn=
 	_conn="${!__conn_user}"
 	log_inf "Dumping all databases as ${_conn}"
-	pg_dumpall ${*} -C -U "${_conn}" -h "${DB_HOST}" > "${dumpfile}"
+	pg_dumpall ${*} -c --if-exists -U "${_conn}" -h "${DB_HOST}" > "${dumpfile}"
 	gzip -9 -v "${dumpfile}"
 }
 

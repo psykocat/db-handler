@@ -1,11 +1,11 @@
 #!/bin/bash
 
-file_env DB_USER
-file_env DB_PASSWORD
-if [ -n "${DB_ROOT_USER:-}" ]; then
-	file_env DB_ROOT_USER
-	file_env DB_ROOT_PASSWORD
+if [ -n "${DB_USER:-}" ]; then
+	file_env DB_USER
+	file_env DB_PASSWORD
 fi
+file_env DB_ROOT_USER
+file_env DB_ROOT_PASSWORD
 file_env DB_NAME
 
 backup_file=
@@ -26,16 +26,18 @@ _restore_database(){
 	local _backup_file="${backup_file%.gz}" _conn=
 	_conn="${!__conn_user}"
 	log_inf "Restoring ${DB_NAME} as ${_conn}"
-	gunzip "${backup_file}.gz"
-	psql ${*} -C -U "${_conn}" -h "${DB_HOST}" "${DB_NAME}" < "${_backup_file}"
+	gunzip -f -k "${backup_file}"
+	psql ${*} --set ON_ERROR_STOP=on -U "${_conn}" -h "${DB_HOST}" "${DB_NAME}" < "${_backup_file}"
+	rm -vf "${_backup_file}"
 }
 
 _restore_all_databases(){
 	local _backup_file="${backup_file%.gz}" _conn=
 	_conn="${!__conn_user}"
 	log_inf "Restoring all databases as ${_conn}"
-	gunzip "${backup_file}"
-	psql ${*} -C -U "${_conn}" -h "${DB_HOST}" postgres -f "${_backup_file}"
+	gunzip -f -k "${backup_file}"
+	psql ${*} --set ON_ERROR_STOP=on -U "${_conn}" -h "${DB_HOST}" postgres -f "${_backup_file}"
+	rm -vf "${_backup_file}"
 }
 
 # Input the command to execute in a _main() function
@@ -59,12 +61,13 @@ _main(){
 			--all)
 				__restore_method="_restore_all_databases"
 				;;
-			--root)
-				if [ -z "${DB_ROOT_USER:-}" ]; then
-					log_err "No root user infos provided. Please fill DB_ROOT_USER and DB_ROOT_PASSWORD variables."
+			--user)
+				if [ -z "${DB_USER:-}" ]; then
+					log_err "No user infos provided. Please fill DB_USER and DB_PASSWORD variables."
 					exit 1
 				fi
-				__conn_user="DB_ROOT_USER"
+				__conn_user="DB_USER"
+				#DB_NAME=postgres
 				;;
 			*)
 				if [ -s "${__shared_dir}/${1}" ]; then
@@ -78,7 +81,7 @@ _main(){
 	done
 	_setup_pgpass
 
-	if [ -n "${backup_latest_}" ]; then
+	if [ -z "${backup_file}" ]; then
 		log_err "No backup properly provided, please check your arguments"
 		exit 1
 	fi
