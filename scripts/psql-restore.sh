@@ -46,6 +46,9 @@ _main(){
 
 	while [ ${#} -gt 0 ]; do
 		case ${1} in
+			--debug)
+				set -x
+				;;
 			--)
 				shift;
 				for _remain in ${@}; do
