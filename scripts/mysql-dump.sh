@@ -5,7 +5,8 @@ file_env DB_USER
 file_env DB_NAME
 
 _main(){
-	local dump_basepath="${_TS}_backup_${DB_NAME}.sql" dumpfile="${__shared_dir}/${dump_basepath}"
+	local dump_basepath="${_TS}_backup_${DB_NAME}.sql" dumpfile=
+	dumpfile="${__shared_dir}/${dump_basepath}"
 	mysqldump \
 		--add-drop-table \
 		--compress \
