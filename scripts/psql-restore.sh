@@ -20,7 +20,7 @@ _sub_usage(){
 }
 
 __restore_method="_restore_database"
-__conn_user="DB_USER"
+__conn_user="DB_ROOT_USER"
 
 _restore_database(){
 	local _backup_file="${backup_file%.gz}" _conn=
