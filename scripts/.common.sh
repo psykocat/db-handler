@@ -74,12 +74,21 @@ file_env() {
 _setup_pgpass(){
 	local _pfile="${HOME}/.pgpass"
 
-	## Root user shall always specify the targeted DB to use as the default voluntarily does not exists.
-	cat > "${_pfile}" <<-EOF
-	${DB_HOST}:${DB_PORT}:${DB_NAME}:${DB_USER}:${DB_PASSWORD}
-	${DB_HOST}:${DB_PORT}:*:${DB_ROOT_USER}:${DB_ROOT_PASSWORD}
-	EOF
-	chmod 600 ${_pfile}
+	rm -f "${_pfile}"
+
+	if [ -n "${DB_USER:-}" ]; then
+		cat > "${_pfile}" <<-EOF
+		${DB_HOST}:${DB_PORT}:${DB_NAME}:${DB_USER}:${DB_PASSWORD}
+		EOF
+	fi
+
+	if [ -n "${DB_ROOT_USER:-}" ]; then
+		## Root user shall always specify the targeted DB to use as the default voluntarily does not exists.
+		cat > "${_pfile}" <<-EOF
+		${DB_HOST}:${DB_PORT}:*:${DB_ROOT_USER}:${DB_ROOT_PASSWORD}
+		EOF
+	fi
+	chmod 600 "${_pfile}"
 }
 ### END OF Common functions
 
