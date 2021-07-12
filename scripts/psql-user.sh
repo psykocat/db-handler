@@ -37,24 +37,32 @@ _create_db(){
 	local _dbname="${1}"
 
 	log_inf "Create database '${_dbname}' if not already existing"
+	psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" postgres -tc "SELECT 1 FROM pg_database WHERE datname = '${_dbname}'" | grep -q -e '1' || psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" postgres -c "CREATE DATABASE \"${_dbname}\""
 	# Use default database postgres as reference for logging
-	echo "SELECT 'CREATE DATABASE ${_dbname}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${_dbname}')\gexec" | psql -U ${DB_ROOT_USER} -h ${DB_HOST} postgres
 }
 
 _delete_db(){
-	local _dbname="${1}"
+	local _dbname="${1}" _pgs="/tmp/command.sql"
 
 	log_inf "Delete database '${_dbname}' if existing"
 	# Use default database postgres as reference for logging
-	echo "DROP DATABASE IF EXISTS ${_dbname}\gexec" | psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" postgres
+	cat > "${_pgs}" <<-EOF
+	DROP DATABASE IF EXISTS "${_dbname}"
+	EOF
+
+	psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" postgres -f "${_pgs}"
 }
 
 _add_db_extension(){
-	local _ext="${1}" _dbname="${2}"
+	local _ext="${1}" _dbname="${2}" _pgs="/tmp/command.sql"
 
 	log_inf "Enable '${_ext}' extension if not already existing"
 	# Use default database postgres as reference for logging
-	echo "CREATE EXTENSION IF NOT EXISTS ${_ext}\gexec" | psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" "${_dbname}"
+	cat > "${_pgs}" <<-EOF
+	CREATE EXTENSION IF NOT EXISTS ${_ext}
+	EOF
+
+	psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" "${_dbname}" -f "${_pgs}"
 }
 
 _create_user(){
@@ -67,10 +75,10 @@ _create_user(){
 	_files_to_remove+=("${_pgs}")
 
 	cat > "${_pgs}" <<-EOF
-	CREATE USER ${__int_db_user} WITH ENCRYPTED PASSWORD '${_dbpass}';
-	GRANT ALL PRIVILEGES ON DATABASE ${_dbname} TO ${__int_db_user};
-	GRANT ${__int_db_user} TO ${__int_db_root_user};
-	ALTER DATABASE ${_dbname} OWNER TO ${__int_db_user};
+	CREATE USER "${__int_db_user}" WITH ENCRYPTED PASSWORD '${_dbpass}';
+	GRANT ALL PRIVILEGES ON DATABASE "${_dbname}" TO "${__int_db_user}";
+	GRANT "${__int_db_user}" TO "${__int_db_root_user}";
+	ALTER DATABASE "${_dbname}" OWNER TO "${__int_db_user}";
 	EOF
 	psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" postgres -f "${_pgs}"
 }
@@ -83,7 +91,7 @@ _delete_user(){
 
 	log_inf "Remove user '${__int_db_user}'"
 	cat > "${_pgs}" <<-EOF
-	DROP USER ${__int_db_user};
+	DROP USER "${__int_db_user}";
 	EOF
 	psql -U "${DB_ROOT_USER}" -h "${DB_HOST}" postgres -f "${_pgs}"
 }

@@ -57,6 +57,8 @@ _main(){
 	done
 	if [ ${#_args[*]} -eq 0 ]; then
 		set -- -h "${DB_HOST}" -U "${!__conn_user}" "${DB_NAME}"
+	else
+		set -- ${_args[@]}
 	fi
 	_setup_pgpass
 	log_inf psql "${@}"
