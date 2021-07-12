@@ -77,14 +77,14 @@ _setup_pgpass(){
 	rm -f "${_pfile}"
 
 	if [ -n "${DB_USER:-}" ]; then
-		cat > "${_pfile}" <<-EOF
+		cat >> "${_pfile}" <<-EOF
 		${DB_HOST}:${DB_PORT}:${DB_NAME}:${DB_USER}:${DB_PASSWORD}
 		EOF
 	fi
 
 	if [ -n "${DB_ROOT_USER:-}" ]; then
 		## Root user shall always specify the targeted DB to use as the default voluntarily does not exists.
-		cat > "${_pfile}" <<-EOF
+		cat >> "${_pfile}" <<-EOF
 		${DB_HOST}:${DB_PORT}:*:${DB_ROOT_USER}:${DB_ROOT_PASSWORD}
 		EOF
 	fi
