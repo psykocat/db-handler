@@ -10,6 +10,7 @@ services:
     volumes:
       - "${LOCAL_DB_PASSWORD_FILE}:/run/secrets/db_password:ro"
       - "${LOCAL_DB_ROOT_PASSWORD_FILE}:${POSTGRES_PASSWORD_FILE}:ro"
+      - "./sample:/docker-entrypoint-initdb.d"
   mysql:
     image: mariadb:10.6
     environment:
@@ -20,6 +21,7 @@ services:
     volumes:
       - "${LOCAL_DB_PASSWORD_FILE}:${MYSQL_PASSWORD_FILE}:ro"
       - "${LOCAL_DB_ROOT_PASSWORD_FILE}:${MYSQL_ROOT_PASSWORD_FILE}:ro"
+      - "./sample:/docker-entrypoint-initdb.d"
 
 networks:
   default:
