@@ -3,7 +3,7 @@
 set -eu
 
 docker-compose build -q; 
-./run.sh psql-user
+./run.sh psql-user --debug
 
 echo -e "\n#####################\n"
 
