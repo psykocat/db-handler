@@ -23,6 +23,7 @@ _sub_usage(){
 # Input the command to execute in a _main() function
 _main(){
 	local _args=()
+	local use_default_credentials=
 
 	while [ ${#} -gt 0 ]; do
 		case ${1} in
@@ -37,6 +38,9 @@ _main(){
 				unset -- _remain
 				shift $#
 				break
+				;;
+			--auto-connect)
+				use_default_credentials="yes"
 				;;
 			-help|--help)
 				_sub_usage
@@ -58,7 +62,11 @@ _main(){
 	if [ ${#_args[*]} -eq 0 ]; then
 		set -- -h "${DB_HOST}" -U "${!__conn_user}" "${DB_NAME}"
 	else
-		set -- ${_args[@]}
+		if [ "${use_default_credentials}" == "yes" ]; then
+			set -- -h "${DB_HOST}" -U "${!__conn_user}" "${DB_NAME}" ${_args[@]}
+		else
+			set -- ${_args[@]}
+		fi
 	fi
 	_setup_pgpass
 	log_inf psql "${@}"
