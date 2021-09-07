@@ -52,8 +52,13 @@ preset_rights
 
 ## Check first argument to see if it is a subscript or a binary
 if ! command -v ${1:-} &>/dev/null; then
+	_script=${1}
+	if [ "${_script:0:1}" = "X" ]; then
+		_script="${_script:1}"
+		set -x
+	fi
 	# Add extension if missing
-	_script_exec="${DBHANDLER_SCRIPTS_DIR}/${1#.sh}.sh"
+	_script_exec="${DBHANDLER_SCRIPTS_DIR}/${_script#.sh}.sh"
 	# Check that subscript exists
 	[[ -s "${_script_exec}" ]] || { usage; exit 0; }
 	shift
